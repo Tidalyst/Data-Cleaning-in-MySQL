@@ -48,7 +48,7 @@ SELECT *
 FROM (
        SELECT *, 
                ROW_NUMBER () OVER (
-                         PARTITION BY company, location, industry,  percentage_laid_off, `date`)
+                             PARTITION BY company, location, industry,  percentage_laid_off, `date`)
 						AS row_num
 		FROM layoffs_staging
 	) AS duplicates 
@@ -64,23 +64,25 @@ WHERE company = 'Hibob';
 SELECT *
 FROM (
 	SELECT *,
-		   ROW_NUMBER() OVER (
-			                PARTITION BY company, location, industry, total_laid_off,percentage_laid_off,`date`, stage, country, funds_raised_millions
+	       ROW_NUMBER() OVER (
+		            PARTITION BY company, location, industry, 
+	                            total_laid_off,percentage_laid_off,`date`, stage, country, funds_raised_millions
 			) AS row_num
 	 FROM layoffs_staging
      ) duplicates
 WHERE row_num > 1;
 
--- To delete these dupicates,I turn the subquery into  a CTE 
+-- I turn the subquery into a CTE for easier readability 
 WITH duplicate_cte AS 
 (
-		 SELECT *
-         FROM (
-				SELECT *,
-				ROW_NUMBER() OVER (
-							  PARTITION BY company, location, industry, total_laid_off,percentage_laid_off,`date`, stage, country, funds_raised_millions
-				) AS row_num
-	            FROM layoffs_staging
+    SELECT *
+    FROM (
+           SELECT *,
+		  ROW_NUMBER() OVER (
+			       PARTITION BY company, location, industry, 
+	                               total_laid_off,percentage_laid_off,`date`, stage, country, funds_raised_millions
+			  ) AS row_num
+	   FROM layoffs_staging
                 ) duplicates
           WHERE row_num > 1 
 )
@@ -105,9 +107,9 @@ FROM duplicate_cte;
 
 INSERT INTO layoffs_staging2
 SELECT *,
-	   ROW_NUMBER() OVER (
-						 PARTITION BY company, location, industry, total_laid_off,percentage_laid_off,`date`, stage, country, funds_raised_millions
-				) AS row_num
+       ROW_NUMBER() OVER (
+		    PARTITION BY company, location, industry, total_laid_off,percentage_laid_off,`date`, stage, country, funds_raised_millions
+	) AS row_num
 FROM layoffs_staging;
 
 SELECT *
